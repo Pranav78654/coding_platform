@@ -1,25 +1,25 @@
-const express = require('express');
-const cookieParser = require("cookie-parser");
+import express from 'express';
+import cookieParser from "cookie-parser";
 
 require('dotenv').config();
-const connectDB = require('./config/database');
+import connectDB from './config/database';
 
-const userRoutes = require('./routes/userRoute');
-const errorHandler = require('./middleware/errorHandler');
-const profileRouter = require('./routes/profile');
-const sessionRoutes = require('./routes/sessionRoute');
-const handRaiseRoute = require('./routes/handRaiseRoute');
+import userRoutes from './routes/userRoute';
+import errorHandler from './middleware/errorHandler';
+import profileRouter from './routes/profile';
+import sessionRoutes from './routes/sessionRoute';
+import handRaiseRoute from './routes/handRaiseRoute';
 const app = express();
 
 // Middleware
 app.use(cookieParser());
-app.use(express.json());
+app.use(json());
 
 // Routes
-app.use('/api/auth', userRoutes);
-app.use('/api/',profileRouter);
+app.use('/api/user', userRoutes);
+app.use('/api/', profileRouter);
 app.use('/api/session', sessionRoutes);
-app.use('/api/hand',handRaiseRoute);
+app.use('/api/hand', handRaiseRoute);
 // Error Handling Middleware
 app.use(errorHandler);
 

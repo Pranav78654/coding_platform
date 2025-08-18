@@ -16,7 +16,8 @@ app.use(express.json());
 // Routes
 app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
-
+app.use("/api/work" , workspaceRoute);
+app.use("/api/file" , fileRoutes);
 
 
 // Start server after DB connects

@@ -1,14 +1,14 @@
 import express from "express"
 const router = express.Router();
 
-import fileController from "../controllers/fileController"
-router.post('/', fileController.createFile);
+import {createFile , getFile , updateFile , deleteFile} from "../controllers/fileController.js"
+router.post('/', createFile);
 
-router.get('/', fileController.getFile);
-router.get('/:id', fileController.getFile);
+router.get('/', getFile);
+router.get('/:id', getFile);
 
-router.put('/:id', fileController.updateFile);
+router.put('/:id', updateFile);
 
-router.delete('/:id', fileController.deleteFile);
+router.delete('/:id', deleteFile);
 
-module.exports = router;
+export default router;

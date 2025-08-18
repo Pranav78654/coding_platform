@@ -1,4 +1,4 @@
-import Workspace from "../models/workspaceModel";
+import Workspace from "../models/workspaceModel.js";
 
 // Create a new workspace
 export const createWorkspace = async (req, res) => {

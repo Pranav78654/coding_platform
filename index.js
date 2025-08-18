@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import connectDB from "./config/database.js"
 import authRoute from "./routes/authRoute.js";
 import userRoute from "./routes/userRoute.js";
+import chatRoute from "./routes/chatRoute.js";
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ app.use(express.json());
 // Routes
 app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
+app.use("/api/chat", chatRoute);
 
 
 // Start server after DB connects

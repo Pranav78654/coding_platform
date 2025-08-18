@@ -1,10 +1,10 @@
 import express from "express";
 import dotenv from "dotenv";
-import connectDB from "./config/database";
-import authRoute from "./routes/authRoute";
-import userRoute from "./routes/userRoute";
+import connectDB from "./config/database.js"
+import authRoute from "./routes/authRoute.js";
+import userRoute from "./routes/userRoute.js";
 
-
+dotenv.config();
 
 
 const app = express();

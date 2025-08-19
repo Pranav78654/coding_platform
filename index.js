@@ -39,7 +39,7 @@ app.use("/api/reviews", reviewRoutes);
 
 // Register all socket logic
 app.set("io", io); 
-registerVoiceSocket(io);
+// registerVoiceSocket(io);
 registerTextSocket(io);
 
 // Start server after DB connects

@@ -1,6 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
-import http from "http";                     // 👈 NEW
+import http from "http";                     
 import { Server } from "socket.io"; 
 
 import connectDB from "./config/database.js"

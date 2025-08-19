@@ -1,32 +1,32 @@
 import mongoose from "mongoose";
 
-const {Schema} = mongoose;
+const { Schema } = mongoose;
 
 const chatSchema = new Schema({
-    workspaceId:{
+    workspaceId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Workspace",
         required: true
     },
-    senderId:{
+    senderId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true
     },
-    message:{
+    message: {
         type: String,
         required: true,
         trim: true
     },
-    isEdited:{
+    isEdited: {
         type: Boolean,
         default: false
     },
-    isDeleted:{
+    isDeleted: {
         type: Boolean,
         default: false
     },
-},{timestamps: true}
+}, { timestamps: true }
 );
 
 export default mongoose.model("Chat", chatSchema);

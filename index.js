@@ -25,6 +25,7 @@ app.use("/api/chat", chatRoute);
 app.use("/api/reviews", reviewRoutes);
 
 
+
 // Start server after DB connects
 const PORT = process.env.PORT || 5000;
 connectDB().then(() => {

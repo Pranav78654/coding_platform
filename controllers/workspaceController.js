@@ -27,7 +27,9 @@ export const createWorkspace = async (req, res) => {
 export const getWorkspace = async (req, res) => {
   try {
     const workspaceId = req.params.id;
-    const workspace = await Workspace.findById(workspaceId);
+    const workspace = await Workspace.findById(workspaceId)
+      .populate("owner", "username email")
+      .populate("participants", "username email");
 
     if (!workspace) {
       return res.status(404).json({ message: 'Workspace not found' });
@@ -61,7 +63,9 @@ export const updateWorkspace = async (req, res) => {
 export const deleteWorkspace = async (req, res) => {
   try {
     const workspaceId = req.params.id;
-    await Workspace.findByIdAndDelete(workspaceId);
+    await Workspace.findByIdAndDelete(workspaceId)
+      .populate("owner", "username email")
+      .populate("participants", "username email");
 
     return res.json({ message: 'Workspace deleted successfully' });
   } catch (error) {

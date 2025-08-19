@@ -1,12 +1,12 @@
 import express from "express"
 const router = express.Router();
-import authMiddleware  from "../middleware/authMiddleware.js";
+import {protect}  from "../middleware/authMiddleware.js";
 import {createFile , getFile , updateFile , deleteFile} from "../controllers/fileController.js"
 
-router.post('/',authMiddleware ,createFile);
-router.get('/', authMiddleware, getFile);
-router.get('/:id', authMiddleware, getFile);
-router.put('/:id', authMiddleware, updateFile);
-router.delete('/:id', authMiddleware, deleteFile);
+router.post('/',protect ,createFile);
+router.get('/', protect, getFile);
+router.get('/:id', protect, getFile);
+router.put('/:id', protect, updateFile);
+router.delete('/:id', protect, deleteFile);
 
 export default router;

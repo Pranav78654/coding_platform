@@ -15,6 +15,9 @@ export const sendMessage = async (req, res) => {
             message
         });
 
+
+    req.app.get("io").to(workspaceId).emit("new-message", chat);
+
         res.status(201).json(chat);
     } catch (error) {
         res.status(500).json({

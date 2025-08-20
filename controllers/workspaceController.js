@@ -4,10 +4,10 @@ import Workspace from "../models/workspaceModel.js";
 export const createWorkspace = async (req, res) => {
   try {
     const { name, participants = [] } = req.body;
-    const ownerId = req.user._id; 
+    const ownerId = req.user._id;
 
     // always include owner in participants
-    if (!participants.includes(ownerId)) {
+    if (!participants.includes(ownerId.toString())) {
       participants.push(ownerId);
     }
 
@@ -32,7 +32,7 @@ export const getWorkspace = async (req, res) => {
       .populate("participants", "username email");
 
     if (!workspace) {
-      return res.status(404).json({ message: 'Workspace not found' });
+      return res.status(404).json({ message: "Workspace not found" });
     }
 
     return res.json(workspace);
@@ -41,33 +41,50 @@ export const getWorkspace = async (req, res) => {
   }
 };
 
-// Update workspace
+// Update workspace (only owner)
 export const updateWorkspace = async (req, res) => {
   try {
     const workspaceId = req.params.id;
     const updates = req.body;
 
-    const updatedWorkspace = await Workspace.findByIdAndUpdate(
-      workspaceId,
-      updates,
-      { new: true }
-    );
+    const workspace = await Workspace.findById(workspaceId);
 
-    return res.json(updatedWorkspace);
+    if (!workspace) {
+      return res.status(404).json({ message: "Workspace not found" });
+    }
+
+    // Only owner can update
+    if (workspace.owner.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    Object.assign(workspace, updates);
+    await workspace.save();
+
+    return res.json(workspace);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
 };
 
-// Delete workspace
+// Delete workspace (only owner)
 export const deleteWorkspace = async (req, res) => {
   try {
     const workspaceId = req.params.id;
-    await Workspace.findByIdAndDelete(workspaceId)
-      .populate("owner", "username email")
-      .populate("participants", "username email");
+    const workspace = await Workspace.findById(workspaceId);
 
-    return res.json({ message: 'Workspace deleted successfully' });
+    if (!workspace) {
+      return res.status(404).json({ message: "Workspace not found" });
+    }
+
+    // Only owner can delete
+    if (workspace.owner.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    await workspace.deleteOne();
+
+    return res.json({ message: "Workspace deleted successfully" });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

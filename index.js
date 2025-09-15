@@ -10,6 +10,7 @@ import workspaceRoute from "./routes/workspaceRoutes.js";
 import fileRoutes from "./routes/fileRoutes.js";
 import chatRoute from "./routes/chatRoute.js";
 import reviewRoutes from "./routes/reviewRoute.js";
+import sessionRoute from "./routes/sessionRoute.js";
 
 // import the socket handlers
 import registerVoiceSocket from "./sockets/voiceSocket.js";
@@ -35,7 +36,7 @@ app.use("/api/work" , workspaceRoute);
 app.use("/api/file" , fileRoutes);
 app.use("/api/chat", chatRoute);
 app.use("/api/reviews", reviewRoutes);
-
+app.use("/api/session", sessionRoute);
 
 
 // Register all socket logic

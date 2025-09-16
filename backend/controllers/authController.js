@@ -63,11 +63,18 @@ export const loginUser = async (req, res) => {
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
+    // 🔑 Store token in HTTP-only cookie
+    res.cookie("token", token, {
+      httpOnly: true,   // prevents JavaScript access
+      secure: process.env.NODE_ENV === "production", // only HTTPS in prod
+      sameSite: "strict", // CSRF protection
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
     res.json({
       _id: user._id,
       username: user.username,
       email: user.email,
-      token,
       message: "Login successful",
     });
   } catch (error) {
@@ -75,6 +82,7 @@ export const loginUser = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // @desc Get all users (protected route)
 export const getAllUsers = async (req, res) => {

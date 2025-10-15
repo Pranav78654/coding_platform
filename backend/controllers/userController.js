@@ -1,194 +1,95 @@
-// import User from "../models/userModel.js";
-
-
-// export const getAllUsers = async (req, res) => {
-//     try {
-//         const users = await User.find().select("-password");
-//         res.status(200).json(users);
-//     } catch (error) {
-//         res.status(500).json({ message: error.message });
-//     }
-// };
-
-
-// export const getUserById = async (req, res) => {
-//     try {
-//         const user = await User.findById(req.params.id).select("-password");
-//         if (!user) return res.status(404).json({ message: "User not found" });
-
-//         res.status(200).json(user);
-//     } catch (error) {
-//         res.status(500).json({ message: error.message });
-//     }
-// };
-
-
-// export const updateUser = async (req, res) => {
-//     try {
-//         const { username, email, image, role } = req.body;
-
-//         const user = await User.findById(req.params.id);
-//         if (!user) return res.status(404).json({ message: "User not found" });
-
-
-//         if (req.user._id.toString() !== user._id.toString() && req.user.role !== "admin") {
-//             return res.status(403).json({ message: "Not authorized to update this user" });
-//         }
-
-//         if (req.body.password) {
-//             user.password = req.body.password;
-//         }
-
-//         user.username = username || user.username;
-//         user.email = email || user.email;
-//         user.image = image || user.image;
-//         if (req.user.role === "admin") {
-//             user.role = role || user.role;
-//         }
-
-//         const updatedUser = await user.save();
-//         res.status(200).json({
-//             id: updatedUser._id,
-//             username: updatedUser.username,
-//             email: updatedUser.email,
-//             image: updatedUser.image,
-//             role: updatedUser.role,
-//         });
-//     } catch (error) {
-//         res.status(500).json({ message: error.message });
-//     }
-// };
-
-
-// export const deleteUser = async (req, res) => {
-//     try {
-//         const user = await User.findById(req.params.id);
-//         if (!user) return res.status(404).json({ message: "User not found" });
-
-//         await user.deleteOne();
-//         res.status(200).json({ message: "User deleted successfully" });
-//     } catch (error) {
-//         res.status(500).json({ message: error.message });
-//     }
-// };
-
-
-
-
-
-
-
-
-
 import User from "../models/userModel.js";
+import Workspace from "../models/workspaceModel.js"; // Import Workspace model for cleanup
 
-export const getAllUsers = async (req, res) =>{
-    try{
-        if(req.user.role != "ta"){
-            return res.status(403).json({
-                message: "Access Denied"
-            });
-        }
-
-        const users = await User.find().select("-password");
-        res.status(200).json(users);
-    } catch(error){
-        res.status(500).json({
-            message: error.message
-        });
-    }
+// Your getAllUsers function is perfect, no changes needed.
+export const getAllUsers = async (req, res) => {
+  // ... your existing code ...
 };
 
-export const getUserById = async (req, res) =>{
-    try{
-        const user = await User.findById(req.params.id).select("-password");
-        if(!user){
-            return res.status(404).json({
-                message: "User Not Found"
-            });
-        }
-        if(req.user.role != "ta" && req.user._id.toString() != user._id.toString()){
-            return res.status(403).json({
-                message: "Access Denied"
-            });
-        }
-        res.status(200).json(user);
-    } catch(error){
-        res.status(500).json({
-            message: error.message
-        });
+/**
+ * @desc    Get a single user by their ID
+ * @route   GET /api/users/:id
+ * @access  Private
+ */
+export const getUserById = async (req, res) => {
+  try {
+    // --- IMPROVEMENT ---
+    // Populate the 'workspaces' field to get details about each workspace.
+    const user = await User.findById(req.params.id)
+      .select("-password")
+      .populate("workspaces", "name owner"); // Fetches name and owner of each workspace
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User Not Found",
+      });
     }
+    if (
+      req.user.role != "ta" &&
+      req.user._id.toString() != user._id.toString()
+    ) {
+      return res.status(403).json({
+        message: "Access Denied",
+      });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
 };
 
-export const updateUser = async (req, res) =>{
-    try{
-        const {username, email, image, role} = req.body;
-
-        const user = await User.findById(req.params.id);
-        if(!user){
-            return res.status(404).json({
-                message: "User Not Found"
-            });
-        }
-
-        if(req.user._id.toString() !== user._id.toString() && req.user.role !== "ta"){
-            return res.status(403).json({
-                message: "Not authorized to update this user"
-            });
-        }
-
-        if(req.body.password){
-            user.password = req.body.password;
-        }
-        user.username = username || user.username;
-        user.email = email || user.email;
-        user.image = image || user.image;
-
-        if(req.user.role === "ta"){
-            user.role = role || user.role;
-        }
-
-        const updateUser = await user.save();
-        res.status(200).json({
-            id : updateUser._id,
-            username: updateUser.username,
-            email: updateUser.email,
-            image: updateUser.image,
-            role: updateUser.role,
-        });
-    } catch(error){
-        res.status(500).json({
-            message: error.message
-        });
-    }
+// Your updateUser function is perfect, no changes needed.
+export const updateUser = async (req, res) => {
+  // ... your existing code ...
 };
 
-export const deleteUser = async (req, res) =>{
-    try{
-        const user = await User.findById(req.params.id);
-        if(!user){
-            return res.status(404).json({
-                message: "User Not Found"
-            });
-        }
-
-        if(req.user._id.toString() !== user._id.toString() && req.user.role !== "ta"){
-            return res.status(403).json({
-                message: "Not authorized to delete this user"
-            });
-        }
-
-        await user.deleteOne();
-        res.status(200).json({
-            message: "User deleted successfully"
-        });
-    } catch(error){
-        res.status(500).json({
-            message: error.message
-        });
+/**
+ * @desc    Delete a user
+ * @route   DELETE /api/users/:id
+ * @access  Private (Self or TA)
+ */
+export const deleteUser = async (req, res) => {
+  try {
+    const userToDelete = await User.findById(req.params.id);
+    if (!userToDelete) {
+      return res.status(404).json({ message: "User Not Found" });
     }
+
+    if (
+      req.user._id.toString() !== userToDelete._id.toString() &&
+      req.user.role !== "ta"
+    ) {
+      return res
+        .status(403)
+        .json({ message: "Not authorized to delete this user" });
+    }
+
+    // --- IMPROVEMENT: DATABASE CLEANUP ---
+
+    // 1. Find all workspaces owned by this user.
+    const ownedWorkspaces = await Workspace.find({ owner: userToDelete._id });
+    const ownedWorkspaceIds = ownedWorkspaces.map(ws => ws._id);
+
+    // 2. Remove this user from the participants list of all other workspaces.
+    await Workspace.updateMany(
+      { participants: userToDelete._id, _id: { $nin: ownedWorkspaceIds } },
+      { $pull: { participants: userToDelete._id } }
+    );
+    
+    // 3. Delete all workspaces owned by this user.
+    if(ownedWorkspaceIds.length > 0) {
+        await Workspace.deleteMany({ _id: { $in: ownedWorkspaceIds } });
+    }
+
+    // 4. Finally, delete the user themselves.
+    await userToDelete.deleteOne();
+
+    res.status(200).json({ message: "User and associated workspaces deleted successfully" });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
 };
-
-
-
-

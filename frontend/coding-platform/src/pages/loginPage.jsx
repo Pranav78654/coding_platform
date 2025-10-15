@@ -2,13 +2,17 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import AuthTabs from "../components/AuthTabs";
-
+import { useContext } from 'react';
+import { AuthContext } from "../context/AuthContext";
 export default function Login() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(""); 
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
+
+    const { setUser } = useContext(AuthContext);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,14 +24,22 @@ export default function Login() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
-        credentials: "include",
+        credentials: "include", // This is crucial for sending cookies
       });
 
       const data = await res.json();
 
       if (res.ok) {
         setSuccess(data.message || "Login successful");
-        localStorage.setItem("token", data.token);
+        
+        // ** THE KEY CHANGE **
+        // 1. We update the global user state with the user data from the API
+        setUser(data.user); 
+        
+        // 2. We remove the insecure localStorage line completely
+        // localStorage.setItem("token", data.token); // <-- DELETE THIS LINE
+
+        // Redirect to the main dashboard after a successful login
         setTimeout(() => navigate("/"), 1200);
       } else {
         setError(data.message || "Login failed");

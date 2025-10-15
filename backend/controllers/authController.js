@@ -1,10 +1,19 @@
 import User from "../models/userModel.js";
-import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-// Generate JWT
+// This function can stay the same.
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+};
+
+// A helper function to set the cookie. This avoids repetition.
+const sendTokenCookie = (res, token) => {
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
 };
 
 // @desc Register user
@@ -17,7 +26,6 @@ export const registerUser = async (req, res) => {
     }
 
     const emailLower = email.toLowerCase();
-
     const existingUser = await User.findOne({ email: emailLower });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
@@ -26,19 +34,25 @@ export const registerUser = async (req, res) => {
     const user = await User.create({
       username,
       email: emailLower,
-      password, // pre-save hook in schema will hash this
+      password,
     });
+    
+    // Generate token and set it in the cookie
+    const token = generateToken(user._id);
+    sendTokenCookie(res, token);
 
+    // Send response WITHOUT the token
     res.status(201).json({
-      _id: user._id,
-      username: user.username,
-      email: user.email,
-      token: generateToken(user._id),
       message: "User registered successfully",
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+      }
     });
   } catch (error) {
     console.error("❌ Register Error:", error.message);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Server error during registration." });
   }
 };
 
@@ -61,35 +75,43 @@ export const loginUser = async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+    const token = generateToken(user._id);
+    sendTokenCookie(res, token);
 
-    // 🔑 Store token in HTTP-only cookie
-    res.cookie("token", token, {
-      httpOnly: true,   // prevents JavaScript access
-      secure: process.env.NODE_ENV === "production", // only HTTPS in prod
-      sameSite: "strict", // CSRF protection
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
-
+    // Send response WITHOUT the token
     res.json({
-      _id: user._id,
-      username: user.username,
-      email: user.email,
       message: "Login successful",
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+      }
     });
   } catch (error) {
     console.error("❌ Login Error:", error.message);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Server error during login." });
   }
 };
 
+// @desc Verify user session from cookie
+// NEW function to check if the user has a valid session
+export const verifyUser = async (req, res) => {
+  // authMiddleware will run before this. If the token is valid, 
+  // it will attach the user object (minus password) to req.user.
+  res.status(200).json({
+    message: "User is authenticated",
+    user: req.user 
+  });
+};
 
-// @desc Get all users (protected route)
-export const getAllUsers = async (req, res) => {
-  try {
-    const users = await User.find().select("-password");
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+// @desc Logout user
+export const logoutUser = (req, res) => {
+    // Clear the cookie by setting an expired one
+    res.cookie("token", "", {
+        httpOnly: true,
+        expires: new Date(0),
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+    });
+    res.status(200).json({ message: "Logout successful" });
 };

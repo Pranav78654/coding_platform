@@ -1,4 +1,4 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
 const WorkspaceSchema = new mongoose.Schema(
   {
@@ -8,17 +8,26 @@ const WorkspaceSchema = new mongoose.Schema(
     },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
     participants: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: "User",
+      },
+    ],
+    // --- RECOMMENDED ADDITION ---
+    // A reference to all files contained within this workspace.
+    files: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "File",
       },
     ],
   },
   { timestamps: true }
 );
 
-export default mongoose.model('Workspace', WorkspaceSchema);
+export default mongoose.model("Workspace", WorkspaceSchema);
+

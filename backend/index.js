@@ -14,7 +14,7 @@ import fileRoutes from "./routes/fileRoutes.js";
 import chatRoute from "./routes/chatRoute.js";
 import reviewRoutes from "./routes/reviewRoute.js";
 import sessionRoute from "./routes/sessionRoute.js";
-
+import invitationRoute from "./routes/invitationRoute.js"
 import registerVoiceSocket from "./sockets/voiceSocket.js";
 import registerTextSocket from "./sockets/textSocket.js";
 
@@ -49,7 +49,7 @@ app.use("/api/file", fileRoutes);
 app.use("/api/chat", chatRoute);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/session", sessionRoute);
-
+app.use("/api/invitation" , invitationRoute);
 // Register all socket logic
 app.set("io", io);
 registerTextSocket(io);

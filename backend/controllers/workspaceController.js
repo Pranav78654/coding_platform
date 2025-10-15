@@ -1,70 +1,97 @@
 import Workspace from "../models/workspaceModel.js";
 import User from "../models/userModel.js";
+import mongoose from "mongoose";
 
-/**
- * @desc    Create a new workspace
- * @route   POST /api/work
- * @access  Private
- */
+// Get all workspaces for the logged-in user
+export const getUserWorkspaces = async (req, res) => {
+  try {
+    // Find all workspaces where the current user is a participant
+    const workspaces = await Workspace.find({ participants: req.user._id })
+      .populate('owner', 'username email _id') // Crucial: Populate the owner field with these details
+      .populate('participants', 'username email') // Also good to populate participants
+      .sort({ updatedAt: -1 }); // Sort by the most recently updated
+
+    res.json(workspaces);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Create a new workspace
 export const createWorkspace = async (req, res) => {
   try {
     const { name } = req.body;
     const ownerId = req.user._id;
 
     if (!name) {
-      return res.status(400).json({ message: "Workspace name is required" });
+      return res.status(400).json({ message: "Workspace name is required." });
     }
 
-    const newWorkspace = await Workspace.create({
+    const newWorkspace = new Workspace({
       name,
       owner: ownerId,
-      participants: [ownerId], // Owner is the first participant
+      participants: [ownerId], // The owner is the first participant
     });
 
-    // --- IMPROVEMENT ---
-    // Add the new workspace's ID to the owner's user document.
-    await User.findByIdAndUpdate(ownerId, {
-      $push: { workspaces: newWorkspace._id },
-    });
+    await newWorkspace.save();
 
-    return res.status(201).json(newWorkspace);
+    // Also update the User document to include this new workspace
+    await User.findByIdAndUpdate(ownerId, { $push: { workspaces: newWorkspace._id } });
+    
+    // Populate the owner details before sending the response back
+    const populatedWorkspace = await Workspace.findById(newWorkspace._id)
+        .populate('owner', 'username email _id');
+
+    return res.status(201).json(populatedWorkspace);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
 };
 
-/**
- * @desc    Get all workspaces for the logged-in user
- * @route   GET /api/work
- * @access  Private
- */
-export const getUserWorkspaces = async (req, res) => {
+// Get a single workspace
+export const getWorkspace = async (req, res) => {
   try {
-    // Find workspaces where the user is a participant and populate their names
-    const userWithWorkspaces = await User.findById(req.user._id).populate(
-      "workspaces",
-      "name owner" // Select only the fields you need for the list
-    );
+    const workspaceId = req.params.id;
+    const workspace = await Workspace.findById(workspaceId)
+      .populate("owner", "username email")
+      .populate("participants", "username email");
 
-    if (!userWithWorkspaces) {
-      return res.status(404).json({ message: "User not found" });
+    if (!workspace) {
+      return res.status(404).json({ message: "Workspace not found" });
     }
 
-    res.json(userWithWorkspaces.workspaces);
+    return res.json(workspace);
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
 };
 
-// Get a single workspace (Your existing code is great, no changes needed)
-export const getWorkspace = async (req, res) => {
-  // ... your existing code ...
+// Update workspace (only owner)
+export const updateWorkspace = async (req, res) => {
+  try {
+    const workspaceId = req.params.id;
+    const updates = req.body;
+
+    const workspace = await Workspace.findById(workspaceId);
+
+    if (!workspace) {
+      return res.status(404).json({ message: "Workspace not found" });
+    }
+
+    // Only owner can update
+    if (workspace.owner.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    Object.assign(workspace, updates);
+    await workspace.save();
+
+    return res.json(workspace);
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
 };
 
-// Update workspace (Your existing code is great, no changes needed)
-export const updateWorkspace = async (req, res) => {
-  // ... your existing code ...
-};
 
 /**
  * @desc    Delete workspace (only owner)

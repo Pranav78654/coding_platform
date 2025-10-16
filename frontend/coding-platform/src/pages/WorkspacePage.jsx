@@ -3,7 +3,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import CreateItemModal from "../components/CreateItemModal";
-
+import { useAlert } from "../context/AlertContext"; // 1. Import useAlert
+import { usePrompt } from "../context/PromptContext";
 // --- Import UI and Child Components ---
 import LeftSidebar from "../components/LeftSidebar";
 import EditorPanel from "../components/EditorPanel";
@@ -20,7 +21,8 @@ export default function WorkspacePage() {
     const [fileTree, setFileTree] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-
+  const { showAlert } = useAlert(); // 2. Get the showAlert function
+const { showPrompt } = usePrompt();
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalType, setModalType] = useState("file");
@@ -170,7 +172,7 @@ export default function WorkspacePage() {
     };
     
     const handleAIFetch = async (endpoint, body, loadingType) => {
-        if (!activeFile && endpoint !== 'generate') return alert("Open a file first!");
+        if (!activeFile && endpoint !== 'generate') return showAlert("Open a file first!");
         
         setIsAiLoading(loadingType);
         setAiResponse("");
@@ -196,9 +198,15 @@ export default function WorkspacePage() {
     const handleExplain = () => handleAIFetch('explain', { code: activeFile.content, language: getLanguage(activeFile.name) }, 'explain');
     const handleFix = () => handleAIFetch('fix', { code: activeFile.content, language: getLanguage(activeFile.name) }, 'fix');
     const handleGenerate = () => {
-        const userPrompt = prompt("What do you want to generate?");
-        if (!userPrompt) return;
-        handleAIFetch('generate', { prompt: userPrompt, language: getLanguage(activeFile?.name) }, 'generate');
+        showPrompt({
+            title: "Generate Code with AI",
+            label: "Describe the code you want to generate:",
+            onSubmit: (userPrompt) => {
+                if (userPrompt) {
+                    handleAIFetch('generate', { prompt: userPrompt, language: getLanguage(activeFile?.name) }, 'generate');
+                }
+            }
+        });
     };
 
     // --- RENDER LOGIC ---

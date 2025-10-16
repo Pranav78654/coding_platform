@@ -1,10 +1,14 @@
 // src/components/modals/InviteMemberModal.jsx
 
 import React, { useState, useEffect, useCallback } from "react";
+import { useAlert } from "../context/AlertContext"; // 1. Import useAlert
+
 import { X, Search, LoaderCircle, UserPlus, CheckCircle, AlertCircle } from "lucide-react";
 
 export default function InviteMemberModal({ isOpen, onClose, workspaceId }) {
   const [searchQuery, setSearchQuery] = useState("");
+    const { showAlert } = useAlert(); // 2. Get the showAlert function
+
   const [searchResults, setSearchResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -65,7 +69,7 @@ export default function InviteMemberModal({ isOpen, onClose, workspaceId }) {
     } catch (err) {
       console.error("Invitation Error:", err);
       setInviteStatus(prev => ({ ...prev, [user._id]: "error" }));
-      alert(`Error: ${err.message}`); // Simple error feedback
+     showAlert(err.message, "Invitation Failed");  // Simple error feedback
     }
   };
 

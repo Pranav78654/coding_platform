@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useAlert } from "../context/AlertContext"; // 1. Import useAlert
+
 import { useSocket } from '../context/SocketContext';
 import { Send, LoaderCircle, Trash2 } from 'lucide-react';
 
@@ -12,6 +14,8 @@ export default function ChatPanel({ workspaceId }) {
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const messagesEndRef = useRef(null);
+    const { showAlert } = useAlert(); // 2. Get the showAlert function
+
 
   // Auto-scroll to the bottom
   useEffect(() => {
@@ -95,7 +99,7 @@ export default function ChatPanel({ workspaceId }) {
       }
     } catch (error) {
       console.error("Error deleting message:", error);
-      alert(error.message);
+      showAlert(error.message);
     }
   };
 

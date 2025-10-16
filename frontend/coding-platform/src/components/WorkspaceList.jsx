@@ -4,12 +4,14 @@ import { useAuth } from '../context/AuthContext';
 import CreateWorkspaceModal from './CreateWorkspaceModal';
 import RenameWorkspaceModal from './RenameWorkspaceModal';
 import { Plus, LoaderCircle, AlertTriangle, Users, Clock, Briefcase, Edit, Trash2 } from 'lucide-react';
+import { useAlert } from "../context/AlertContext"; // 1. Import useAlert
 
 export default function WorkspaceList() {
   const { user } = useAuth();
   const [workspaces, setWorkspaces] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { showAlert } = useAlert(); // 2. Get the showAlert function
 
   // State for all modals and the context menu
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -66,7 +68,8 @@ export default function WorkspaceList() {
         if (!res.ok) throw new Error('Failed to delete the workspace.');
         setWorkspaces(prev => prev.filter(ws => ws._id !== workspaceId));
       } catch (err) {
-        alert(`Error: ${err.message}`);
+              showAlert(err.message, "Error"); 
+
       }
     }
   };

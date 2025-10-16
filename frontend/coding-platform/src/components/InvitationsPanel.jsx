@@ -3,10 +3,13 @@
 import React, { useState } from 'react';
 import { useSocket } from '../context/SocketContext'; // Adjust path if needed
 import { Mail, Inbox, Check, X, LoaderCircle } from 'lucide-react';
+import { useAlert } from "../context/AlertContext"; // 1. Import useAlert
+
 
 export default function InvitationsPanel() {
   const { invitations, setInvitations } = useSocket();
   const [loadingId, setLoadingId] = useState(null); // To show spinner on a specific button
+  const { showAlert } = useAlert(); // 2. Get the showAlert function
 
   const handleResponse = async (invitationId, action) => {
     setLoadingId(invitationId);
@@ -26,7 +29,7 @@ export default function InvitationsPanel() {
 
     } catch (error) {
       console.error(error);
-      alert(error.message); // Simple error feedback
+      showAlert(error.message); // Simple error feedback
     } finally {
       setLoadingId(null);
     }

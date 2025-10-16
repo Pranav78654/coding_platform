@@ -1,6 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import { SocketProvider } from "./context/SocketContext.jsx"; // 1. Import the SocketProvider
+import { SocketProvider } from "./context/SocketContext.jsx";
+import { AlertProvider, useAlert } from "./context/AlertContext.jsx";
+import { PromptProvider, usePrompt } from "./context/PromptContext.jsx"; // Import Prompt context
+
+import AlertModal from "./components/AlertModal.jsx";
+import PromptModal from "./components/PromptModal.jsx"; // Import Prompt modal
 
 // Layouts
 import DashboardLayout from "./pages/DashboardLayout.jsx";
@@ -29,32 +34,54 @@ function ProtectedRoute({ children }) {
   return user ? children : <Navigate to="/login" />;
 }
 
+/**
+ * A small helper component to render the global alert modal.
+ */
+function GlobalAlert() {
+  const { isOpen, title, message, hideAlert } = useAlert();
+  return <AlertModal isOpen={isOpen} onClose={hideAlert} title={title} message={message} />;
+}
+
+/**
+ * A small helper component to render the global prompt modal.
+ */
+function GlobalPrompt() {
+    const { isOpen, title, label, onSubmit, hidePrompt } = usePrompt();
+    return <PromptModal isOpen={isOpen} onClose={hidePrompt} onSubmit={onSubmit} title={title} label={label} />;
+}
+
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        {/* 2. Wrap your Routes with SocketProvider, inside AuthProvider */}
         <SocketProvider>
-          <Routes>
-            {/* --- PUBLIC ROUTES --- */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
+          <AlertProvider>
+            <PromptProvider>
+              <GlobalAlert />
+              <GlobalPrompt />
+              
+              <Routes>
+                {/* --- PUBLIC ROUTES --- */}
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/signup" element={<SignupPage />} />
 
-            {/* --- PROTECTED ROUTES --- */}
-            <Route
-              element={
-                <ProtectedRoute>
-                  <DashboardLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route path="/dashboard" element={<WorkspaceList />} />
-              <Route path="/workspace/:workspaceId" element={<WorkspacePage />} />
-            </Route>
-            
-          </Routes>
+                {/* --- PROTECTED ROUTES --- */}
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <DashboardLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route path="/dashboard" element={<WorkspaceList />} />
+                  <Route path="/workspace/:workspaceId" element={<WorkspacePage />} />
+                </Route>
+                
+              </Routes>
+            </PromptProvider>
+          </AlertProvider>
         </SocketProvider>
       </AuthProvider>
     </BrowserRouter>
@@ -62,3 +89,4 @@ function App() {
 }
 
 export default App;
+

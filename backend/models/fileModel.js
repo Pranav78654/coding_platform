@@ -1,24 +1,39 @@
 import mongoose from "mongoose";
 
-const FileSchema = new mongoose.Schema(
+const FileSystemItemSchema = new mongoose.Schema(
   {
     workspace: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Workspace',
       required: true,
     },
-    filename: {
+    // The name of the file or folder (e.g., "index.js", "src")
+    name: {
       type: String,
       required: true,
     },
-    language: {
+    // --- NEW FIELD ---
+    // Distinguishes between files and folders
+    type: {
       type: String,
+      enum: ['file', 'folder'],
       required: true,
-      default: 'javascript',
     },
+    // --- NEW FIELD ---
+    // The ID of the parent folder. Null for root items.
+    parent: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'FileSystemItem', // Self-referencing
+      default: null,
+    },
+    // Content is only relevant for items of type 'file'
     content: {
       type: String,
       default: '',
+    },
+    language: {
+      type: String,
+      default: 'plaintext',
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
@@ -28,4 +43,5 @@ const FileSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model('File', FileSchema);
+// Rename the export to be more generic
+export default mongoose.model('FileSystemItem', FileSystemItemSchema);

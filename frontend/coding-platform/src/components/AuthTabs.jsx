@@ -1,4 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
 
 export default function AuthTabs() {
   const navigate = useNavigate();
@@ -7,30 +8,37 @@ export default function AuthTabs() {
   const activeTab = location.pathname === "/signup" ? "signup" : "login";
 
   return (
-    <div className="flex justify-around relative border-b border-gray-700 mb-6">
-      {/* Login Tab */}
-      <button
-        onClick={() => navigate("/login")}
-        className={`pb-2 px-6 font-medium transition-colors ${
-          activeTab === "login"
-            ? "text-cyan-400 border-b-2 border-cyan-400"
-            : "text-gray-400 hover:text-cyan-300"
-        }`}
-      >
-        Login
-      </button>
-
-      {/* Signup Tab */}
-      <button
-        onClick={() => navigate("/signup")}
-        className={`pb-2 px-6 font-medium transition-colors ${
-          activeTab === "signup"
-            ? "text-cyan-400 border-b-2 border-cyan-400"
-            : "text-gray-400 hover:text-cyan-300"
-        }`}
-      >
-        Signup
-      </button>
+    <div className="flex justify-around items-center border-b border-neutral-700/80 mb-6">
+      <Tab
+        text="Login"
+        selected={activeTab === "login"}
+        setSelected={() => navigate("/login")}
+      />
+      <Tab
+        text="Sign Up"
+        selected={activeTab === "signup"}
+        setSelected={() => navigate("/signup")}
+      />
     </div>
   );
 }
+
+const Tab = ({ text, selected, setSelected }) => {
+  return (
+    <button
+      onClick={setSelected}
+      className={`relative w-full py-2.5 text-sm font-medium transition-colors ${
+        selected ? "text-white" : "text-neutral-400 hover:text-neutral-200"
+      }`}
+    >
+      <span className="relative z-10">{text}</span>
+      {selected && (
+        <motion.div
+          layoutId="auth-tab-slider"
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          className="absolute inset-0 bg-cyan-500/10 rounded-t-md border-b-2 border-cyan-500"
+        />
+      )}
+    </button>
+  );
+};

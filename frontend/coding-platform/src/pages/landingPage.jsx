@@ -2,98 +2,128 @@ import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
+import { Code2, Zap, Users, Mic, LoaderCircle, LogIn, ArrowRight } from 'lucide-react';
 
 export default function Landing() {
   const { user, loading } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  // This effect will run when the component mounts and whenever the user or loading state changes.
+  // Redirect logged-in users to the dashboard
   useEffect(() => {
-    // We wait until the initial authentication check is complete (`loading` is false).
     if (!loading && user) {
-      // If the check is done and we have a user, it means they are logged in.
-      // So, we redirect them straight to their dashboard.
       navigate("/dashboard");
     }
-  }, [user, loading, navigate]); // Dependencies for the effect
+  }, [user, loading, navigate]);
 
-  // While the AuthContext is checking for a token, we can render a blank screen
-  // or a spinner. This prevents a logged-in user from briefly seeing the landing page
-  // before being redirected.
+  // Show a full-screen loader during the initial auth check
   if (loading) {
-    return <div className="min-h-screen bg-gray-900" />;
+    return (
+      <div className="min-h-screen bg-[#1e1e1e] flex items-center justify-center">
+        <LoaderCircle size={40} className="animate-spin text-cyan-400" />
+      </div>
+    );
   }
 
-  // If the check is done and there is NO user, we render the full landing page.
+  // Feature items with icons
+  const features = [
+    { 
+      icon: <Users size={24} className="text-cyan-400" />,
+      title: "Real-time Collaboration", 
+      desc: "Code together seamlessly, just like using a collaborative document editor." 
+    },
+    { 
+      icon: <Zap size={24} className="text-cyan-400" />,
+      title: "AI Assistance", 
+      desc: "Get instant code suggestions, explanations, and debugging help from an integrated AI." 
+    },
+    { 
+      icon: <Mic size={24} className="text-cyan-400" />,
+      title: "Voice & Chat", 
+      desc: "Communicate with your team using built-in voice and text chat without leaving the editor." 
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white flex flex-col">
+    <div className="min-h-screen bg-[#1e1e1e] text-white font-sans overflow-x-hidden">
       {/* Navbar */}
-      <header className="flex justify-between items-center px-10 py-6">
-        <h1 className="text-3xl font-extrabold">Codemate</h1>
-        <nav className="space-x-6">
-          <a href="#features" className="hover:text-cyan-400">Features</a>
-          <a href="#about" className="hover:text-cyan-400">About</a>
-          <Link to="/login">
-            <button className="bg-cyan-500 text-black px-4 py-2 rounded-xl">Login</button>
+      <header className="sticky top-0 z-50 bg-[#1e1e1e]/70 backdrop-blur-lg">
+        <nav className="flex justify-between items-center px-6 sm:px-10 py-4 border-b border-neutral-700/80 max-w-7xl mx-auto">
+          <Link to="/" className="flex items-center gap-2 text-xl font-bold hover:text-cyan-400 transition-colors">
+            <Code2 size={24} />
+            <span>Codemate</span>
           </Link>
+          <div className="flex items-center gap-4">
+            <Link to="/login" className="text-sm font-medium text-neutral-300 hover:text-white transition-colors flex items-center gap-1">
+              <LogIn size={14}/>
+              Login
+            </Link>
+            <Link to="/signup">
+              <button className="bg-cyan-500 hover:bg-cyan-600 text-black text-sm font-semibold px-4 py-2 rounded-lg transition-colors flex items-center gap-1.5">
+                <span>Sign Up</span>
+                <ArrowRight size={14}/>
+              </button>
+            </Link>
+          </div>
         </nav>
       </header>
 
       {/* Hero Section */}
-      <motion.section
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="flex flex-col items-center justify-center flex-1 text-center px-6"
-      >
-        <h2 className="text-5xl font-bold mb-6">
-          Collaborate. <span className="text-cyan-400">Code.</span> Create.
-        </h2>
-        <p className="text-gray-300 max-w-2xl mb-8">
-          Real-time coding, AI assistance, and seamless collaboration —
-          all in one platform. Build projects, learn, and grow with Codemate.
-        </p>
-        <div className="space-x-4">
-          {/* This button now correctly links to the signup page */}
+      <main className="max-w-7xl mx-auto">
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="flex flex-col items-center justify-center text-center px-6 py-24 sm:py-32"
+        >
+          <h2 className="text-4xl sm:text-6xl font-extrabold mb-4 tracking-tight">
+            Collaborate. <span className="text-cyan-400">Code.</span> Create.
+          </h2>
+          <p className="text-neutral-400 max-w-2xl mb-8 text-base sm:text-lg">
+            A real-time collaborative coding environment with built-in AI assistance. 
+            Build projects, learn, and grow with your team, all in one platform.
+          </p>
           <Link to="/signup">
-            <button className="bg-cyan-500 px-6 py-3 text-lg rounded-xl shadow-lg">
-              Start Coding
+            <button className="bg-cyan-500 hover:bg-cyan-600 text-black px-6 py-3 text-lg font-semibold rounded-xl shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/30 transition-all transform hover:scale-105">
+              Get Started for Free
             </button>
           </Link>
-          <button className="border border-gray-500 px-6 py-3 text-lg rounded-xl">
-            Join Room
-          </button>
-        </div>
-      </motion.section>
+        </motion.section>
 
-      {/* Features Section */}
-      <section
-        id="features"
-        className="grid grid-cols-1 md:grid-cols-3 gap-8 px-12 py-16"
-      >
-        {[
-          { title: "Real-time Collaboration", desc: "Code together like Google Docs." },
-          { title: "AI Assistance", desc: "Get instant suggestions & debug help." },
-          { title: "Voice & Chat", desc: "Talk while you code with WebRTC." },
-        ].map((f, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.3 }}
-            className="p-6 bg-gray-800 rounded-2xl shadow-lg hover:scale-105 transition-transform"
-          >
-            <h3 className="text-xl font-semibold mb-2">{f.title}</h3>
-            <p className="text-gray-400">{f.desc}</p>
-          </motion.div>
-        ))}
-      </section>
+        {/* Features Section */}
+        <section id="features" className="px-6 py-24 sm:py-32">
+            <div className="text-center mb-12">
+                <h3 className="text-3xl sm:text-4xl font-bold">Everything You Need to Build Together</h3>
+                <p className="text-neutral-400 mt-2 max-w-xl mx-auto">From pair programming to team-wide projects, Codemate has you covered.</p>
+            </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {features.map((feature, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.5 }}
+                transition={{ delay: i * 0.1, duration: 0.5 }}
+                className="p-6 bg-[#252526] rounded-xl border border-neutral-700/80 hover:border-cyan-400/60 transition-colors"
+              >
+                <div className="mb-4">{feature.icon}</div>
+                <h3 className="text-xl font-semibold mb-2 text-white">{feature.title}</h3>
+                <p className="text-neutral-400">{feature.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+      </main>
 
       {/* Footer */}
-      <footer className="text-center py-6 text-gray-500 border-t border-gray-700">
-        © 2025 Codemate. All rights reserved.
+      <footer className="text-center py-8 text-neutral-500 border-t border-neutral-700/80 mt-16">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center px-6">
+            <div className="flex items-center gap-2">
+                <Code2 size={18} />
+                <span className="font-semibold">Codemate</span>
+            </div>
+            <p className="text-sm mt-4 sm:mt-0">&copy; 2025 Codemate. All rights reserved.</p>
+        </div>
       </footer>
     </div>
   );
 }
-

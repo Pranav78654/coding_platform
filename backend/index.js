@@ -17,7 +17,7 @@ import sessionRoute from "./routes/sessionRoute.js";
 import invitationRoute from "./routes/invitationRoute.js"
 import registerVoiceSocket from "./sockets/voiceSocket.js";
 import registerTextSocket from "./sockets/textSocket.js";
-
+import geminiRoutes from "./routes/geminiRoutes.js"
 dotenv.config();
 
 const app = express();
@@ -45,11 +45,12 @@ app.use(cookieParser());
 app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
 app.use("/api/work", workspaceRoute);
-app.use("/api/file", fileRoutes);
+app.use("/api/files", fileRoutes);
 app.use("/api/chat", chatRoute);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/session", sessionRoute);
 app.use("/api/invitation" , invitationRoute);
+app.use("/api/gemini", geminiRoutes);
 // Register all socket logic
 app.set("io", io);
 registerTextSocket(io);

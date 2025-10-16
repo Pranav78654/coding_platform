@@ -1,6 +1,7 @@
 import Workspace from "../models/workspaceModel.js";
 import User from "../models/userModel.js";
 import File from "../models/fileModel.js"; // 1. Import the File model
+import Chat from "../models/chatModel.js"; // 1. Import the Chat model
 import mongoose from "mongoose";
 
 // Get all workspaces for the logged-in user
@@ -115,7 +116,7 @@ export const deleteWorkspace = async (req, res) => {
     // --- CASCADING DELETE LOGIC ---
     // 2. Delete all files and folders associated with this workspace
     await File.deleteMany({ workspace: workspaceId });
-
+    await Chat.deleteMany({ workspaceId: workspaceId });
     // 3. Remove the workspace reference from all participants
     await User.updateMany(
       { _id: { $in: workspace.participants } },

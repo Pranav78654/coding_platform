@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Users, BrainCircuit, MessageCircle, Lightbulb, Wand2, Sparkles } from "lucide-react";
 import InviteMemberModal from "./InviteMemberModal";
-
+import ChatPanel from "./ChatPanel"
 export default function RightSidebar({
   workspace,
   activePanel,
@@ -57,11 +57,7 @@ export default function RightSidebar({
           )}
 
           {activePanel === 'chat' && (
-            <div className="h-full flex flex-col">
-              <h3 className="font-bold text-white mb-3 text-sm uppercase tracking-wider">Chat</h3>
-              <div className="flex-1 mb-2 text-center text-gray-500 flex items-center justify-center"><p>Chat UI coming soon...</p></div>
-              <input type="text" placeholder="Type a message..." className="w-full p-2 bg-neutral-700 rounded border border-neutral-600 focus:outline-none focus:ring-2 focus:ring-cyan-400"/>
-            </div>
+            <ChatPanel workspaceId={workspace._id} />
           )}
         </div>
       </div>

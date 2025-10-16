@@ -67,6 +67,12 @@ export const deleteMessage = async (req, res) => {
                 message: "Delete Your Own Message Only"
             });
         }
+        const twoMinutesInMs = 2 * 60 * 1000;
+ const messageAgeInMs = new Date() - chat.createdAt;
+
+ if (messageAgeInMs > twoMinutesInMs) {
+  return res.status(403).json({ message: "You can only delete messages within 2 minutes of sending." });
+ }
         chat.isDeleted = true;
         chat.message = "This message has been deleted";
         await chat.save();

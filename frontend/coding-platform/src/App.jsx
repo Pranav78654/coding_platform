@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { SocketProvider } from "./context/SocketContext.jsx"; // 1. Import the SocketProvider
 
 // Layouts
 import DashboardLayout from "./pages/DashboardLayout.jsx";
@@ -9,7 +10,7 @@ import LandingPage from "./pages/landingPage.jsx";
 import LoginPage from "./pages/loginPage.jsx";
 import SignupPage from "./pages/signupPage.jsx";
 import WorkspaceList from "./components/WorkspaceList";
-import WorkspacePage from "./pages/WorkspacePage.jsx"; // Make sure this is imported
+import WorkspacePage from "./pages/WorkspacePage.jsx";
 
 /**
  * A special component to protect routes that require authentication.
@@ -33,29 +34,28 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          {/* --- PUBLIC ROUTES --- */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
+        {/* 2. Wrap your Routes with SocketProvider, inside AuthProvider */}
+        <SocketProvider>
+          <Routes>
+            {/* --- PUBLIC ROUTES --- */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
 
-          {/* --- PROTECTED ROUTES --- */}
-          {/* Create a general protected layout route */}
-          <Route
-            element={
-              <ProtectedRoute>
-                <DashboardLayout />
-              </ProtectedRoute>
-            }
-          >
-            {/* All routes nested here will share the same layout and protection */}
-            <Route path="/dashboard" element={<WorkspaceList />} />
-            {/* You can add more protected routes here later, like: */}
-            {/* <Route path="/settings" element={<SettingsPage />} /> */}
-            <Route path="/workspace/:workspaceId" element={<WorkspacePage />} />
-          </Route>
-          
-        </Routes>
+            {/* --- PROTECTED ROUTES --- */}
+            <Route
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route path="/dashboard" element={<WorkspaceList />} />
+              <Route path="/workspace/:workspaceId" element={<WorkspacePage />} />
+            </Route>
+            
+          </Routes>
+        </SocketProvider>
       </AuthProvider>
     </BrowserRouter>
   );

@@ -93,3 +93,25 @@ export const deleteUser = async (req, res) => {
     });
   }
 };
+
+export const searchUsers = async (req, res) => {
+  const keyword = req.query.search
+    ? {
+        $or: [
+          { username: { $regex: req.query.search, $options: "i" } },
+          { email: { $regex: req.query.search, $options: "i" } },
+        ],
+      }
+    : {};
+
+  try {
+    const users = await User.find(keyword)
+      .find({ _id: { $ne: req.user._id } }) // Exclude the current user from results
+      .select("username email") // Only send back necessary info
+      .limit(10); // Limit the number of results
+
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

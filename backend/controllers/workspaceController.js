@@ -1,5 +1,6 @@
 import Workspace from "../models/workspaceModel.js";
 import User from "../models/userModel.js";
+import File from "../models/fileModel.js"; // 1. Import the File model
 import mongoose from "mongoose";
 
 // Get all workspaces for the logged-in user
@@ -107,24 +108,25 @@ export const deleteWorkspace = async (req, res) => {
       return res.status(404).json({ message: "Workspace not found" });
     }
 
-    // Only owner can delete
     if (workspace.owner.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: "Not authorized" });
     }
 
-    // --- IMPROVEMENT ---
-    // Remove the workspace reference from all participants.
+    // --- CASCADING DELETE LOGIC ---
+    // 2. Delete all files and folders associated with this workspace
+    await File.deleteMany({ workspace: workspaceId });
+
+    // 3. Remove the workspace reference from all participants
     await User.updateMany(
       { _id: { $in: workspace.participants } },
       { $pull: { workspaces: workspaceId } }
     );
 
-    // Now delete the workspace itself
+    // 4. Finally, delete the workspace itself
     await workspace.deleteOne();
 
-    return res.json({ message: "Workspace deleted successfully" });
+    return res.json({ message: "Workspace and all associated files deleted successfully" });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }
 };
-

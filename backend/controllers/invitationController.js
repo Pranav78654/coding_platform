@@ -96,3 +96,68 @@ export const declineInvitation = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+
+export const createInvitation = async (req, res) => {
+  const { workspaceId, inviteeEmail } = req.body;
+  const inviterId = req.user._id;
+
+  try {
+    // 1. Find the user to invite
+    const invitee = await User.findOne({ email: inviteeEmail });
+    if (!invitee) {
+      return res.status(404).json({ message: "User with that email not found." });
+    }
+
+    // 2. Find the workspace
+    const workspace = await Workspace.findById(workspaceId);
+    if (!workspace) {
+      return res.status(404).json({ message: "Workspace not found." });
+    }
+
+    // 3. Prevent self-invitation
+    if (invitee._id.toString() === inviterId.toString()) {
+        return res.status(400).json({ message: "You cannot invite yourself." });
+    }
+
+    // 4. Check if the user is already a participant
+    if (workspace.participants.includes(invitee._id)) {
+      return res.status(400).json({ message: "User is already a member of this workspace." });
+    }
+
+    // 5. Check if an invitation is already pending
+    const existingInvitation = await Invitation.findOne({
+      workspace: workspaceId,
+      inviteeEmail: inviteeEmail,
+      status: "pending",
+    });
+
+    if (existingInvitation) {
+      return res.status(400).json({ message: "An invitation has already been sent to this user." });
+    }
+
+    // 6. Create the invitation
+    const newInvitation = await Invitation.create({
+      workspace: workspaceId,
+      inviter: inviterId,
+      invitee: invitee._id, // Add this line
+      inviteeEmail: inviteeEmail,
+    });
+    
+    // --- REAL-TIME MAGIC ---
+const io = req.app.get("io");
+const populatedInvitation = await newInvitation.populate([
+    { path: 'workspace', select: 'name' },
+    { path: 'inviter', select: 'username' }
+]);
+
+// Emit event to the specific user being invited
+io.to(invitee._id.toString()).emit("new-invitation", populatedInvitation);
+
+
+
+    res.status(201).json({ message: "Invitation sent successfully.", invitation: newInvitation });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

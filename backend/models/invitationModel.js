@@ -13,6 +13,11 @@ const invitationSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    invitee: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     // The user who received the invitation (by email)
     inviteeEmail: {
       type: String,

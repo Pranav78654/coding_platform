@@ -5,10 +5,11 @@ import {
   getUserById,
   updateUser,
   deleteUser,
+  searchUsers,
 } from "../controllers/userController.js";
 
 const router = express.Router();
-
+router.route("/search").get(protect, searchUsers);
 // Route to get all users, protected and restricted to 'ta' role
 router.route("/").get(protect, isTA, getAllUsers);
 

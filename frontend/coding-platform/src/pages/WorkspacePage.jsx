@@ -10,7 +10,7 @@ import LeftSidebar from "../components/LeftSidebar";
 import EditorPanel from "../components/EditorPanel";
 import RightSidebar from "../components/RightSidebar";
 import { LoaderCircle, AlertTriangle } from "lucide-react";
-
+import { useSocket } from "../context/SocketContext";
 // --- Custom Hooks for State Management (Optional but Recommended) ---
 // You could move related state and functions into custom hooks like useEditorState, useFileTreeState, etc.
 // For now, we'll keep them here for clarity.
@@ -21,6 +21,7 @@ export default function WorkspacePage() {
     const [fileTree, setFileTree] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+     const { socket } = useSocket()
   const { showAlert } = useAlert(); // 2. Get the showAlert function
 const { showPrompt } = usePrompt();
     // Modal State
@@ -208,6 +209,13 @@ const { showPrompt } = usePrompt();
             }
         });
     };
+    useEffect(() => {
+        // Ensure both socket and workspaceId are available before joining
+        if (socket && workspaceId) {
+            console.log(`Joining workspace room: ${workspaceId}`);
+            socket.emit('join-chat-workspace', workspaceId);
+        }
+    }, [socket, workspaceId]);
 
     // --- RENDER LOGIC ---
     if (isLoading) return ( <div className="..."><LoaderCircle /></div> );
@@ -236,6 +244,7 @@ const { showPrompt } = usePrompt();
                 onSetActiveFileId={setActiveFileId}
                 onUpdateFileContent={updateFileContent}
                 getLanguage={getLanguage}
+                workspaceId={workspaceId} // <-- Pass the workspaceId here
             />
 
             <RightSidebar

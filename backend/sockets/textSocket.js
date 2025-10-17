@@ -17,6 +17,12 @@ export default function registerTextSocket(io) {
       socket.join(workspaceId);
     });
 
+socket.on('cursor-change', (data) => {
+      // Immediately broadcast the change to all OTHER clients in the same workspace room
+      // 'socket.to(...)' sends to everyone except the original sender
+      socket.to(data.workspaceId).emit('cursor-change', data);
+    });
+
     socket.on('disconnect', () => {
         console.log('💬 [text] Socket disconnected:', socket.id);
     });

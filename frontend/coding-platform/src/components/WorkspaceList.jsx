@@ -5,12 +5,13 @@ import CreateWorkspaceModal from './CreateWorkspaceModal';
 import RenameWorkspaceModal from './RenameWorkspaceModal';
 import { Plus, LoaderCircle, AlertTriangle, Users, Clock, Briefcase, Edit, Trash2 } from 'lucide-react';
 import { useAlert } from "../context/AlertContext"; // 1. Import useAlert
-
+import { useConfirm } from '../context/ConfirmContext';
 export default function WorkspaceList() {
   const { user } = useAuth();
   const [workspaces, setWorkspaces] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { showConfirm } = useConfirm();
   const { showAlert } = useAlert(); // 2. Get the showAlert function
 
   // State for all modals and the context menu
@@ -57,21 +58,28 @@ export default function WorkspaceList() {
     setContextMenu({ x: e.pageX, y: e.pageY, workspace });
   };
 
-  const handleDelete = async (workspaceId) => {
-    setContextMenu(null); // Close menu immediately
-    if (window.confirm('Are you sure you want to delete this workspace and all its contents? This is irreversible.')) {
-      try {
-        const res = await fetch(`http://localhost:3333/api/work/${workspaceId}`, {
-          method: 'DELETE',
-          credentials: 'include',
-        });
-        if (!res.ok) throw new Error('Failed to delete the workspace.');
-        setWorkspaces(prev => prev.filter(ws => ws._id !== workspaceId));
-      } catch (err) {
-              showAlert(err.message, "Error"); 
-
+  const handleDelete = (workspaceId) => {
+    setContextMenu(null); // Close the right-click menu
+    
+    // 3. Replace window.confirm with showConfirm
+    showConfirm({
+      title: 'Delete Workspace',
+      message: 'Are you sure you want to delete this workspace and all its contents? This action cannot be undone.',
+      onConfirm: async () => {
+        // The logic that was inside the old `if` block now goes here
+        try {
+          const res = await fetch(`http://localhost:3333/api/work/${workspaceId}`, {
+            method: 'DELETE',
+            credentials: 'include',
+          });
+          if (!res.ok) throw new Error('Failed to delete workspace.');
+          // Update UI instantly
+          setWorkspaces(prev => prev.filter(ws => ws._id !== workspaceId));
+        } catch (err) {
+          showAlert(err.message, "Delete Failed");
+        }
       }
-    }
+    });
   };
 
   const handleWorkspaceRenamed = (updatedWorkspace) => {

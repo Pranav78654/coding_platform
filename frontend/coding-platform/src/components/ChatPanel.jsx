@@ -42,7 +42,7 @@ export default function ChatPanel({ workspaceId }) {
     };
     fetchMessages();
     if (socket) {
-      socket.emit('join-chat-workspace', workspaceId);
+      // socket.emit('join-chat-workspace', workspaceId);
       const handleNewMessage = (message) => {
         setMessages((prev) => [...prev, message]);
       };

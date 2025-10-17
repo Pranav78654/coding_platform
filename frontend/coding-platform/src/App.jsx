@@ -2,10 +2,12 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { SocketProvider } from "./context/SocketContext.jsx";
 import { AlertProvider, useAlert } from "./context/AlertContext.jsx";
-import { PromptProvider, usePrompt } from "./context/PromptContext.jsx"; // Import Prompt context
+import { PromptProvider, usePrompt } from "./context/PromptContext.jsx";
+import { ConfirmProvider, useConfirm } from "./context/ConfirmContext.jsx"; // 1. Import Confirm context
 
 import AlertModal from "./components/AlertModal.jsx";
-import PromptModal from "./components/PromptModal.jsx"; // Import Prompt modal
+import PromptModal from "./components/PromptModal.jsx";
+import ConfirmModal from "./components/ConfirmModal.jsx"; // 2. Import Confirm modal
 
 // Layouts
 import DashboardLayout from "./pages/DashboardLayout.jsx";
@@ -50,6 +52,14 @@ function GlobalPrompt() {
     return <PromptModal isOpen={isOpen} onClose={hidePrompt} onSubmit={onSubmit} title={title} label={label} />;
 }
 
+/**
+ * 3. A small helper component to render the global confirm modal.
+ */
+function GlobalConfirm() {
+    const { isOpen, title, message, onConfirm, hideConfirm } = useConfirm();
+    return <ConfirmModal isOpen={isOpen} onClose={hideConfirm} onConfirm={onConfirm} title={title} message={message} />;
+}
+
 
 function App() {
   return (
@@ -58,28 +68,31 @@ function App() {
         <SocketProvider>
           <AlertProvider>
             <PromptProvider>
-              <GlobalAlert />
-              <GlobalPrompt />
-              
-              <Routes>
-                {/* --- PUBLIC ROUTES --- */}
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/signup" element={<SignupPage />} />
-
-                {/* --- PROTECTED ROUTES --- */}
-                <Route
-                  element={
-                    <ProtectedRoute>
-                      <DashboardLayout />
-                    </ProtectedRoute>
-                  }
-                >
-                  <Route path="/dashboard" element={<WorkspaceList />} />
-                  <Route path="/workspace/:workspaceId" element={<WorkspacePage />} />
-                </Route>
+              <ConfirmProvider> {/* 4. Wrap your application with the ConfirmProvider */}
+                <GlobalAlert />
+                <GlobalPrompt />
+                <GlobalConfirm /> {/* 5. Render the global modal */}
                 
-              </Routes>
+                <Routes>
+                  {/* --- PUBLIC ROUTES --- */}
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/signup" element={<SignupPage />} />
+
+                  {/* --- PROTECTED ROUTES --- */}
+                  <Route
+                    element={
+                      <ProtectedRoute>
+                        <DashboardLayout />
+                      </ProtectedRoute>
+                    }
+                  >
+                    <Route path="/dashboard" element={<WorkspaceList />} />
+                    <Route path="/workspace/:workspaceId" element={<WorkspacePage />} />
+                  </Route>
+                  
+                </Routes>
+              </ConfirmProvider>
             </PromptProvider>
           </AlertProvider>
         </SocketProvider>

@@ -1,0 +1,34 @@
+For register 
+http://localhost:3333/api/auth/register
+{
+  "username" : "Divesh Gupta",
+  "email" : "diveshgupta004@gmail.com",
+  "password" : "diveshgupta@6002"
+}
+
+
+For login
+http://localhost:3333/api/auth/login
+{
+  "username" : "Divesh Gupta",
+  "email" : "diveshgupta004@gmail.com",
+  "password" : "diveshgupta@6002"
+}
+
+
+For Workspace
+http://localhost:3333/api/work/
+{
+  "name" : "Web Project",
+  "owner" : "68a4d936c0c39742cb0b8d6e",
+  "participants" : "68a4d936c0c39742cb0b8d6e"
+}
+
+
+For File
+http://localhost:3333/api/file/
+{
+  "workspace" : "68a54e96ef3052087d5f22bb",
+  "filename" : "Building Backend",
+  "language" : "Node Js"
+}
